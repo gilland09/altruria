@@ -1,0 +1,39 @@
+# Example fly.io configuration - update and save as fly.toml before `flyctl deploy`
+# Replace APPNAME with a unique name (flyctl will help if you run flyctl launch)
+
+app = "your-altruria-app"
+primary_region = "iad"  # change to region near you
+
+[build]
+  image = ""
+
+[env]
+  DEBUG = "False"
+  SECRET_KEY = "replace-me"
+  # Add DB_*, ALLOWED_HOSTS, CORS_ALLOWED, etc. using `flyctl secrets set` instead of committing here
+
+[experimental]
+  allowed_public_ports = [8000]
+
+[[services]]
+  internal_port = 8000
+  protocol = "tcp"
+
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+
+  [[services.ports]]
+    handlers = ["tls","http"]
+    port = 443
+
+  [[services.tcp_checks]]
+    interval = 10000
+    timeout = 2000
+    grace_period = "10s"
+    restart_limit = 0
+
+# Notes:
+# - Use `flyctl secrets set SECRET_KEY="..." DEBUG=False` to add secrets to your app.
+# - For production you should configure a managed DB or attach a volume for persistent storage.
+# - Remove SECRET_KEY from configs; always use secrets.

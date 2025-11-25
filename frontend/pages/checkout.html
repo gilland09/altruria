@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Altruria</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/checkout-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="../index.html" class="logo-wrap">
+                    <img src="../images/logo.png" alt="Altruria Logo" class="logo">
+                </a>
+            </div>
+            
+            <div class="search-container">
+                <select class="category-dropdown">
+                    <option value="">All Categories</option>
+                    <option value="meats">Meats</option>
+                    <option value="vegetables">Vegetables</option>
+                </select>
+                <input type="text" placeholder="Search products..." class="search-bar">
+                <button class="search-button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+            <nav class="nav-links">
+                <a href="../index.html" class="nav-link">Home</a>
+                <a href="products.html" class="nav-link">Products</a>
+                <a href="login.html" class="nav-link">Login</a>
+                <div class="cart-container">
+                    <a href="cart.html" class="cart-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count">0</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="checkout-page">
+        <div class="checkout-wrapper">
+            <h1>Checkout</h1>
+
+            <div class="checkout-grid">
+                <form id="checkout-form" class="checkout-form">
+                    <h2>Shipping Details</h2>
+                    
+                    <!-- Delivery Method Selection -->
+                    <div class="delivery-method-section">
+                        <label>How would you like to receive your order?</label>
+                        <div class="method-options">
+                            <label class="method-choice">
+                                <input type="radio" name="delivery-method" value="pickup" required>
+                                <span>Pick Up</span>
+                            </label>
+                            <label class="method-choice">
+                                <input type="radio" name="delivery-method" value="delivery" required>
+                                <span>Delivery</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Common Fields -->
+                    <label>Full name</label>
+                    <input type="text" name="name" required>
+
+                    <label>Phone</label>
+                    <input type="tel" name="phone" required>
+
+                    <label>Email</label>
+                    <input type="email" name="email">
+
+                    <!-- Pickup Locations (initially hidden) -->
+                    <div id="pickup-section" style="display: none;">
+                        <label>Select Pick Up Location</label>
+                        <div class="pickup-locations">
+                            <div class="pickup-row">
+                                <button type="button" class="location-select" data-map="https://maps.app.goo.gl/db92DYo6741r6guw7">Naval Municipal Grounds</button>
+                                <button type="button" class="open-map" data-map="https://maps.app.goo.gl/db92DYo6741r6guw7">Open Map</button>
+                            </div>
+                            <div class="pickup-row">
+                                <button type="button" class="location-select" data-map="https://maps.app.goo.gl/y3vdXjD27YfqP7Dm9">Provincial Capitol Grounds</button>
+                                <button type="button" class="open-map" data-map="https://maps.app.goo.gl/y3vdXjD27YfqP7Dm9">Open Map</button>
+                            </div>
+                            <div class="pickup-row">
+                                <button type="button" class="location-select" data-map="https://maps.app.goo.gl/9iC1qZ6jjQygT5eRA">Naval Gymnasium</button>
+                                <button type="button" class="open-map" data-map="https://maps.app.goo.gl/9iC1qZ6jjQygT5eRA">Open Map</button>
+                            </div>
+                        </div>
+                        <input type="hidden" name="pickup-location" id="pickup-location-input">
+                        <div id="selected-location" style="margin-top: 1rem; padding: 0.75rem; background: #f0f0f0; border-radius: 6px; display: none;">
+                            <strong>Selected Location:</strong> <span id="location-text"></span>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Fields (initially hidden) -->
+                    <div id="delivery-section" style="display: none;">
+                        <label>Delivery Address</label>
+                        <textarea name="address" rows="3" placeholder="Enter your complete delivery address..."></textarea>
+
+                        <label>Payment Method</label>
+                        <select name="payment" required>
+                            <option value="">Select a payment method</option>
+                            <option value="bank">Bank Transfer</option>
+                            <option value="cod">Cash on Delivery</option>
+                            <option value="gcash">GCash</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="confirm-order-btn">Confirm Order</button>
+                </form>
+
+                <aside class="order-summary">
+                    <h2>Order Summary</h2>
+                    <div class="order-items"></div>
+                    <div class="order-totals">
+                        <div class="summary-row"><span>Subtotal</span><span class="subtotal">₱0.00</span></div>
+                        <div class="summary-row"><span>Shipping</span><span class="shipping">₱0.00</span></div>
+                        <div class="summary-row total"><span>Total</span><span class="total-amount">₱0.00</span></div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/auth.js"></script>
+    <script src="../js/script.js"></script>
+    <script src="../js/checkout.js"></script>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-content">
+                <!-- Left Section: About & Contact -->
+                <div class="footer-section">
+                    <h3>About Altruria</h3>
+                    <p>Altruria brings fresh farm products directly from our farm to your table. We're committed to quality, freshness, and supporting local agriculture with every delivery.</p>
+                    
+                    <h3 style="margin-top: 1.5rem;">Contact Us</h3>
+                    <div class="contact-item">
+                        <span>📍 Naval, Biliran, Philippines</span>
+                    </div>
+                    <div class="contact-item">
+                        <span>
+                            <a href="tel:09956318845">📞 09956318845</a>
+                        </span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="email-copy" onclick="copyEmail(this)" style="cursor: pointer;">
+                            📧 gilland.sabile@bipsu.edu.ph
+                            <span class="copy-feedback">Copied to clipboard!</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Center Section: Follow Us -->
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/share/1a8vsTeKVX/" target="_blank" title="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="https://x.com/g1g9s9s9?t=UDnbfhtqjZmPNR12XTjm9A&s=09" target="_blank" title="Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="https://www.instagram.com/omfg1lland_?igsh=d3lkMW5uaTgxMGo2" target="_blank" title="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right Section: Quick Links -->
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="../index.html">Home</a></li>
+                        <li><a href="products.html">Products</a></li>
+                        <li><a href="cart.html">Cart</a></li>
+                        <li><a href="login.html">Login</a></li>
+                        <li><a href="../terms.html">Terms of Use</a></li>
+                        <li><a href="../privacy.html">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Footer Bottom: Copyright -->
+            <div class="footer-bottom">
+                <p id="copyright">Copyright ©2025 All rights reserved | Altruria Farm Products</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function copyEmail(element) {
+            const email = 'gilland.sabile@bipsu.edu.ph';
+            navigator.clipboard.writeText(email).then(() => {
+                const feedback = element.querySelector('.copy-feedback');
+                feedback.classList.add('show');
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 2000);
+            });
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentYear = new Date().getFullYear();
+            const copyrightElement = document.getElementById('copyright');
+            if (copyrightElement) {
+                copyrightElement.textContent = `Copyright ©${currentYear} All rights reserved | Sabile ${currentYear}`;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - Altruria</title>
+    <link rel="stylesheet" href="../css/signup-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo-login">
+                <img src="../images/logo.png" alt="Altruria Logo" class="logo">
+            </div>
+            <h2>Create your account</h2>
+            
+            <div id="signup-alert" class="alert"></div>
+
+            <form id="signup-form">
+                <div class="name-row">
+                    <input id="first-name" type="text" placeholder="First Name" required autocomplete="given-name">
+                    <input id="last-name" type="text" placeholder="Last Name" required autocomplete="family-name">
+                </div>
+                <input id="signup-email" type="email" placeholder="Email address" required autocomplete="email">
+                <input id="mobile" type="tel" placeholder="Mobile number" required autocomplete="tel">
+                <input id="address" type="text" placeholder="Address" required autocomplete="street-address">
+                <input id="signup-password" type="password" placeholder="Password" required autocomplete="new-password">
+                <input id="signup-password-confirm" type="password" placeholder="Confirm Password" required autocomplete="new-password">
+
+                <label>
+                    <input type="checkbox" id="agree-terms" required>
+                    <span>I agree to Altruria's <a href="../pages/terms.html" target="_blank">Terms of Use</a> and <a href="../pages/privacy.html" target="_blank">Privacy Policy</a></span>
+                </label>
+
+                <button type="submit" class="signup-btn" id="signup-btn-submit">Create Account</button>
+            </form>
+
+            <div class="back-link">
+                <a href="../pages/login.html">Back to Login</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        const API_URL = window.API_BASE_URL || 'http://localhost:8000/api';
+        const signupForm = document.getElementById('signup-form');
+        const alertBox = document.getElementById('signup-alert');
+        const signupBtn = document.getElementById('signup-btn-submit');
+
+        function showAlert(message, type = 'error') {
+            alertBox.textContent = message;
+            alertBox.className = `alert show ${type}`;
+            setTimeout(() => alertBox.classList.remove('show'), 4000);
+        }
+
+        function setButtonLoading(isLoading) {
+            signupBtn.disabled = isLoading;
+            signupBtn.classList.toggle('loading', isLoading);
+            signupBtn.textContent = isLoading ? '' : 'Create Account';
+        }
+
+        function validateEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function validatePhone(phone) {
+            return /^[0-9\s\-\+\(\)]{7,}$/.test(phone.replace(/\s/g, ''));
+        }
+
+        signupForm.onsubmit = async function(e) {
+            e.preventDefault();
+            
+            const first = document.getElementById('first-name').value.trim();
+            const last = document.getElementById('last-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const mobile = document.getElementById('mobile').value.trim();
+            const address = document.getElementById('address').value.trim();
+            const pwd = document.getElementById('signup-password').value;
+            const pwd2 = document.getElementById('signup-password-confirm').value;
+            const agree = document.getElementById('agree-terms').checked;
+
+            // Validation
+            if (!first || !last || !email || !mobile || !address || !pwd || !pwd2) {
+                showAlert('Please fill in all required fields.', 'warning');
+                return;
+            }
+
+            if (first.length < 2) {
+                showAlert('First name must be at least 2 characters.', 'warning');
+                return;
+            }
+
+            if (last.length < 2) {
+                showAlert('Last name must be at least 2 characters.', 'warning');
+                return;
+            }
+
+            if (!validateEmail(email)) {
+                showAlert('Please enter a valid email address.', 'warning');
+                return;
+            }
+
+            if (!validatePhone(mobile)) {
+                showAlert('Please enter a valid phone number (at least 7 digits).', 'warning');
+                return;
+            }
+
+            if (address.length < 5) {
+                showAlert('Please provide a valid address.', 'warning');
+                return;
+            }
+
+            if (pwd.length < 8) {
+                showAlert('Password must be at least 8 characters long.', 'warning');
+                return;
+            }
+
+            if (pwd !== pwd2) {
+                showAlert('Passwords do not match. Please try again.', 'error');
+                return;
+            }
+
+            if (!agree) {
+                showAlert('Please agree to the Terms of Use and Privacy Policy.', 'warning');
+                return;
+            }
+
+            setButtonLoading(true);
+            
+            try {
+                // Call backend signup endpoint
+                const signupResponse = await fetch(`${API_URL}/auth/register/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: email.split('@')[0],
+                        email,
+                        first_name: first,
+                        last_name: last,
+                        password: pwd,
+                        password_confirm: pwd2,
+                        mobile,
+                        address
+                    })
+                });
+
+                if (signupResponse.ok) {
+                    // Auto-login after signup
+                    const loginResponse = await fetch(`${API_URL}/auth/login/`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password: pwd })
+                    });
+
+                    if (loginResponse.ok) {
+                        const loginData = await loginResponse.json();
+                        localStorage.setItem('access_token', loginData.access);
+                        if (loginData.refresh) localStorage.setItem('refresh_token', loginData.refresh);
+                        
+                        // Get user profile
+                        const userResponse = await fetch(`${API_URL}/auth/me/`, {
+                            headers: { 'Authorization': `Bearer ${loginData.access}` }
+                        });
+                        
+                        if (userResponse.ok) {
+                            const user = await userResponse.json();
+                            setCurrentUser(user);
+                        }
+                        
+                        showAlert('Account created successfully!', 'success');
+                        setTimeout(() => window.location.href = '../index.html', 600);
+                    } else {
+                        showAlert('Account created! Please log in.', 'success');
+                        setTimeout(() => window.location.href = 'login.html', 1500);
+                    }
+                } else {
+                    const errorData = await signupResponse.json();
+                    const errorMsg = errorData.detail || errorData.email?.[0] || 'Error creating account';
+                    showAlert(errorMsg, 'error');
+                    setButtonLoading(false);
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                showAlert('Connection error. Please try again.', 'error');
+                setButtonLoading(false);
+            }
+        };
+
+        // Autofocus
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('first-name').focus();
+        });
+    </script>
+</body>
+</html>

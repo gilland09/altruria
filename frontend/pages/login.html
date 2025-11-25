@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Sign Up - Altruria</title>
+    <link rel="stylesheet" href="../css/login-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo-login">
+                <img src="../images/logo.png" alt="Altruria Logo" class="logo">
+            </div>
+            <h2>Welcome to Altruria</h2>
+
+            <div id="login-alert" class="alert"></div>
+
+            <form id="login-form">
+                <input id="login-identifier" type="email" placeholder="Email address" required autocomplete="email">
+                <input id="login-password" type="password" placeholder="Password" required autocomplete="current-password">
+                <button type="submit" class="login-btn" id="login-btn-submit">Log In</button>
+            </form>
+
+            <div style="margin-top: 0.75rem;">
+                <a href="../pages/signup.html" class="signup-btn" style="display: inline-block; padding: 0.9rem 1rem; background-color: var(--secondary-color); color: white; border-radius: 8px; text-decoration: none; width: calc(100% - 2rem);">Create New Account</a>
+            </div>
+
+            <div class="divider">or</div>
+            <button type="button" class="guest-btn" onclick="enterAsGuest()"><i class="fas fa-user-secret"></i> Enter as Guest</button>
+        </div>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        const API_URL = window.API_BASE_URL || 'http://localhost:8000/api';
+        const loginForm = document.getElementById('login-form');
+        const alertBox = document.getElementById('login-alert');
+        const loginBtn = document.getElementById('login-btn-submit');
+
+        function showAlert(message, type = 'error') {
+            alertBox.textContent = message;
+            alertBox.className = `alert show ${type}`;
+            setTimeout(() => alertBox.classList.remove('show'), 4000);
+        }
+
+        function setButtonLoading(isLoading) {
+            loginBtn.disabled = isLoading;
+            loginBtn.classList.toggle('loading', isLoading);
+            loginBtn.textContent = isLoading ? '' : 'Log In';
+        }
+
+        function enterAsGuest() {
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('altruria_current_user');
+            window.location.href = '../index.html';
+        }
+
+        loginForm.onsubmit = async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-identifier').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            if (!email || !password) {
+                showAlert('Please enter your email and password.', 'warning');
+                return;
+            }
+
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showAlert('Please enter a valid email address.', 'warning');
+                return;
+            }
+
+            setButtonLoading(true);
+            
+            try {
+                // Try backend API first
+                const loginResponse = await fetch(`${API_URL}/auth/login/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (loginResponse.ok) {
+                    const data = await loginResponse.json();
+                    localStorage.setItem('access_token', data.access);
+                    if (data.refresh) localStorage.setItem('refresh_token', data.refresh);
+                    
+                    // Get user profile
+                    const userResponse = await fetch(`${API_URL}/auth/me/`, {
+                        headers: { 'Authorization': `Bearer ${data.access}` }
+                    });
+                    
+                    if (userResponse.ok) {
+                        const user = await userResponse.json();
+                        setCurrentUser(user);
+                    }
+                    
+                    showAlert('Login successful!', 'success');
+                    setTimeout(() => window.location.href = '../index.html', 500);
+                } else {
+                    const errorData = await loginResponse.json();
+                    showAlert(errorData.detail || 'Invalid email or password.', 'error');
+                    setButtonLoading(false);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showAlert('Connection error. Please try again.', 'error');
+                setButtonLoading(false);
+            }
+        };
+
+        // Autofocus for better UX
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('login-identifier').focus();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Altruria</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/profile-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Small profile page improvements */
+        .order-card { border: 1px solid #eee; padding: 12px; margin-bottom: 12px; border-radius: 8px; background:#fff }
+        .order-header { display:flex; justify-content:space-between; align-items:center; gap:12px }
+        .order-details { margin-top:10px; display: none }
+        .order-items { margin-bottom:8px }
+        .order-item-row { display:flex; justify-content:space-between; gap:8px; padding:6px 0; border-bottom:1px dashed #f0f0f0 }
+        .order-status { padding:6px 10px; border-radius:16px; font-size:0.85rem }
+        .status-pending { background:#fff7e6; color:#b86b00 }
+        .status-paid { background:#e6f7ff; color:#006b8f }
+        .status-shipped { background:#e6ffe6; color:#157f2e }
+        .status-completed { background:#f0f7ff; color:#0b5fff }
+        .status-cancelled { background:#ffe6e6; color:#b30000 }
+        .order-actions { margin-top:8px; display:flex; gap:8px }
+        .btn-plain { background:none;border:1px solid #ddd;padding:6px 10px;border-radius:6px;cursor:pointer }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="../index.html" class="logo-wrap">
+                    <img src="../images/logo.png" alt="Altruria Logo" class="logo">
+                </a>
+            </div>
+            
+            <div class="search-container">
+                <select class="category-dropdown">
+                    <option value="">All Categories</option>
+                    <option value="meats">Meats</option>
+                    <option value="vegetables">Vegetables</option>
+                </select>
+                <input type="text" placeholder="Search products..." class="search-bar">
+                <button class="search-button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+            <nav class="nav-links">
+                <a href="../index.html" class="nav-link">Home</a>
+                <a href="products.html" class="nav-link">Products</a>
+                <a href="profile.html" class="nav-link active">Profile</a>
+                <div class="cart-container">
+                    <a href="cart.html" class="cart-link">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count">0</span>
+                    </a>
+                </div>
+                <button id="logout-btn" class="nav-link logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="profile-page">
+        <div class="profile-wrapper">
+            <h1>My Profile</h1>
+
+            <div class="profile-grid">
+                <!-- User Information Section -->
+                <section class="profile-section">
+                    <div class="section-header">
+                        <h2>Account Information</h2>
+                        <button id="edit-toggle-btn" class="edit-toggle-btn">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </div>
+
+                    <!-- Display Mode (Read-only) -->
+                    <div id="profile-display" class="profile-display">
+                        <div class="info-group">
+                            <label>Full Name</label>
+                            <p id="display-name" class="info-value">-</p>
+                        </div>
+
+                        <div class="info-group">
+                            <label>Email</label>
+                            <p id="display-email" class="info-value">-</p>
+                        </div>
+
+                        <div class="info-group">
+                            <label>Phone Number</label>
+                            <p id="display-phone" class="info-value">-</p>
+                        </div>
+
+                        <div class="info-group">
+                            <label>Address</label>
+                            <p id="display-address" class="info-value">-</p>
+                        </div>
+
+                        <div class="info-group">
+                            <label>Member Since</label>
+                            <p id="display-created" class="info-value">-</p>
+                        </div>
+                    </div>
+
+                    <!-- Edit Mode (Editable Form) -->
+                    <form id="profile-edit-form" class="profile-edit-form" style="display: none;">
+                        <div class="form-group">
+                            <label for="edit-name">Full Name</label>
+                            <input type="text" id="edit-name" name="name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit-email">Email</label>
+                            <input type="email" id="edit-email" name="email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit-phone">Phone Number</label>
+                            <input type="tel" id="edit-phone" name="phone" placeholder="+63...">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit-address">Address</label>
+                            <textarea id="edit-address" name="address" rows="3" placeholder="Enter your complete address..."></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-save">
+                                <i class="fas fa-check"></i> Save Changes
+                            </button>
+                            <button type="button" id="cancel-edit-btn" class="btn-cancel">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Loading state -->
+                    <div id="profile-loading" class="loading-spinner" style="display: none;">
+                        <i class="fas fa-spinner fa-spin"></i> Loading profile...
+                    </div>
+                </section>
+
+                <!-- Order History Section -->
+                <section class="orders-section">
+                    <h2>Order History</h2>
+                    
+                    <div id="orders-container" class="orders-container">
+                        <div class="loading-spinner">
+                            <i class="fas fa-spinner fa-spin"></i> Loading orders...
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-content">
+                <!-- Left Section: About & Contact -->
+                <div class="footer-section">
+                    <h3>About Altruria</h3>
+                    <p>Altruria brings fresh farm products directly from our farm to your table. We're committed to quality, freshness, and supporting local agriculture with every delivery.</p>
+                    
+                    <h3 style="margin-top: 1.5rem;">Contact Us</h3>
+                    <div class="contact-item">
+                        <span>📍 Naval, Biliran, Philippines</span>
+                    </div>
+                    <div class="contact-item">
+                        <span>
+                            <a href="tel:09956318845">📞 09956318845</a>
+                        </span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="email-copy" onclick="copyEmail(this)" style="cursor: pointer;">
+                            📧 gilland.sabile@bipsu.edu.ph
+                            <span class="copy-feedback">Copied to clipboard!</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Center Section: Follow Us -->
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
+                    <div class="social-links">
+                        <a href="https://www.facebook.com/share/1a8vsTeKVX/" target="_blank" title="Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="https://x.com/g1g9s9s9?t=UDnbfhtqjZmPNR12XTjm9A&s=09" target="_blank" title="Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="https://www.instagram.com/omfg1lland_?igsh=d3lkMW5uaTgxMGo2" target="_blank" title="Instagram">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right Section: Quick Links -->
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="../index.html">Home</a></li>
+                        <li><a href="products.html">Products</a></li>
+                        <li><a href="cart.html">Cart</a></li>
+                        <li><a href="login.html">Login</a></li>
+                        <li><a href="../terms.html">Terms of Use</a></li>
+                        <li><a href="../privacy.html">Privacy Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Footer Bottom: Copyright -->
+            <div class="footer-bottom">
+                <p id="copyright">Copyright ©2025 All rights reserved | Altruria Farm Products</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/script.js"></script>
+    <script src="../js/profile.js"></script>
+
+    <script>
+        function copyEmail(element) {
+            const email = 'gilland.sabile@bipsu.edu.ph';
+            navigator.clipboard.writeText(email).then(() => {
+                const feedback = element.querySelector('.copy-feedback');
+                feedback.classList.add('show');
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 2000);
+            });
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentYear = new Date().getFullYear();
+            const copyrightElement = document.getElementById('copyright');
+            if (copyrightElement) {
+                copyrightElement.textContent = `Copyright ©${currentYear} All rights reserved | Sabile ${currentYear}`;
+            }
+        });
+    </script>
+</body>
+</html>
