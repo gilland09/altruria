@@ -141,7 +141,7 @@ async function loadProducts() {
                 products.push({
                     id: prod.id,
                     name: prod.name || prod.title || 'Unknown Product',
-                    price: prod.price || prod.unit_price || 0,
+                    price: parseFloat(prod.price || prod.unit_price || 0),
                     image: prod.image || prod.photo || '../images/default-product.png', // Fallback: /frontend/images/default-product.png
                     ...prod
                 });
