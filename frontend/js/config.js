@@ -264,3 +264,24 @@ window.showSuccess = showSuccess;
 window.safeNumber = safeNumber;
 window.formatCurrency = formatCurrency;
 
+// Global toast helper (unified across pages)
+if (!window.showToast) {
+  window.showToast = function(message, type = 'info') {
+    try {
+      const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `<i class="fas fa-${icon}"></i><span>${message}</span>`;
+      document.body.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.add('show'));
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    } catch (e) {
+      console.warn('Toast error:', e);
+      alert(message);
+    }
+  };
+}
+

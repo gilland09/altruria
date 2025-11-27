@@ -413,7 +413,9 @@ a:hover {
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-xl);
   z-index: var(--z-toast);
-  animation: slideIn 0.3s ease-out;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: opacity var(--transition-base), transform var(--transition-base);
 }
 
 @keyframes slideIn {
@@ -426,6 +428,16 @@ a:hover {
     opacity: 1;
   }
 }
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast.toast-success { border-left: 4px solid var(--success); }
+.toast.toast-error { border-left: 4px solid var(--error); }
+.toast.toast-info { border-left: 4px solid var(--info); }
+.toast i { margin-right: var(--space-sm); }
 
 /* ============================================
    UTILITY CLASSES

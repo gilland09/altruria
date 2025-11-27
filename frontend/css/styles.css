@@ -241,6 +241,14 @@ header.hide {
     box-shadow: 0 8px 16px rgba(0,0,0,0.12);
 }
 
+/* Smooth hover transitions for buttons and links */
+.nav-link,
+.add-to-cart-btn,
+.category-btn,
+.search-button {
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 .product-card::before {
     content: '';
     position: absolute;
@@ -703,6 +711,19 @@ footer {
     border: 5px solid rgba(0,0,0,0.08);
     border-top-color: var(--primary-color);
     animation: spin 1s linear infinite;
+}
+
+/* Form validation feedback */
+input:invalid,
+textarea:invalid,
+select:invalid {
+    border-color: #F44336;
+}
+
+input:focus:invalid,
+textarea:focus:invalid,
+select:focus:invalid {
+    box-shadow: 0 0 0 3px rgba(244, 67, 54, 0.15);
 }
 
 @keyframes spin {
