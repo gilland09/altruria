@@ -23,7 +23,7 @@ async function fetchAndRenderCart() {
     try {
         // Fetch products if not already loaded
         if (!window._products || window._products.length === 0) {
-            const endpoint = 'http://localhost:8000/api/products/';
+            const endpoint = `${API_BASE_URL}/products/`;
             const res = await fetch(endpoint, { 
                 method: 'GET',
                 headers: { 'Accept': 'application/json' },
