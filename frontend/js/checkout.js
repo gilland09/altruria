@@ -1,8 +1,6 @@
 // Checkout page logic with full backend API integration
 // Handles cart loading, order submission, and backend API communication
-
-// Use the global API_BASE_URL from config.js (set by env.js override)
-const API_BASE = typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'http://localhost:8000';
+// Uses global API_BASE and API_BASE_URL from config.js
 
 /**
  * Initialize checkout page - load cart and user data
