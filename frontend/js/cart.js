@@ -2,6 +2,12 @@
 
 const SHIPPING_COST = 80;
 
+// Helper function to get cart from localStorage
+function _getCart() {
+    const cartData = localStorage.getItem('altruria_cart');
+    return cartData ? JSON.parse(cartData) : [];
+}
+
 async function fetchAndRenderCart() {
     console.log('📦 Fetching products for cart rendering...');
     const cartItemsContainer = document.querySelector('.cart-items');
