@@ -334,14 +334,22 @@ function renderOrderHistory(orders) {
 
         let itemsHtml = '';
         if (order.items && order.items.length > 0) {
-            itemsHtml = order.items.map(item => `
-                <div class="order-item-row">
-                    <span>${item.product.name}</span>
-                    <span>×${item.quantity}</span>
-                    <span>₱${(item.price * item.quantity).toFixed(2)}</span>
-                </div>
-            `).join('');
+            itemsHtml = order.items.map(item => {
+                const itemPrice = parseFloat(item.price || 0);
+                const itemQuantity = parseInt(item.quantity || 1);
+                const itemTotal = itemPrice * itemQuantity;
+                return `
+                    <div class="order-item-row">
+                        <span>${item.product?.name || 'Unknown Product'}</span>
+                        <span>×${itemQuantity}</span>
+                        <span>₱${itemTotal.toFixed(2)}</span>
+                    </div>
+                `;
+            }).join('');
         }
+
+        // Parse order total as float to handle Django Decimal string
+        const orderTotal = parseFloat(order.total || 0);
 
         orderEl.innerHTML = `
             <div class="order-header">
@@ -372,7 +380,7 @@ function renderOrderHistory(orders) {
                 
                 <div class="order-total">
                     <span>Total:</span>
-                    <strong>₱${order.total.toFixed(2)}</strong>
+                    <strong>₱${orderTotal.toFixed(2)}</strong>
                 </div>
 
                 <div class="order-actions">
