@@ -296,19 +296,35 @@ function initHeaderEffects() {
   const header = document.querySelector('header');
   if (!header) return;
   let ticking = false;
+  let lastY = window.scrollY || window.pageYOffset || 0;
+  let hideThreshold = 12; // minimal movement to toggle
+
   function onScroll() {
-    if (!ticking) {
-      window.requestAnimationFrame(() => {
-        const y = window.scrollY || window.pageYOffset;
-        if (y > 40) header.classList.add('header-shrink');
-        else header.classList.remove('header-shrink');
-        ticking = false;
-      });
-      ticking = true;
-    }
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(() => {
+      const y = window.scrollY || window.pageYOffset || 0;
+      // shrink when scrolled down a bit
+      if (y > 40) header.classList.add('header-shrink');
+      else header.classList.remove('header-shrink');
+
+      // hide on scroll down, show on scroll up
+      const delta = y - lastY;
+      if (Math.abs(delta) > hideThreshold) {
+        if (delta > 0 && y > 60) {
+          header.classList.add('hide');
+        } else {
+          header.classList.remove('hide');
+        }
+        lastY = y;
+      }
+      ticking = false;
+    });
   }
-  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // Trigger initially
   onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
 }
 
 // Expose for testing
