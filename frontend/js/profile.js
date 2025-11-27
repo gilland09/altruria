@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     setupEditToggle();
     setupFormHandlers();
     setupLogout();
+    setupMessaging();
 
     // Load data
     await loadUserProfile();
@@ -458,6 +459,230 @@ function showTrackingModal(order) {
     }
 
     modal.querySelector('.tracking-close').addEventListener('click', () => modal.remove());
+}
+
+// ============================================================================
+// MESSAGING FUNCTIONALITY
+// ============================================================================
+async function loadUserMessages() {
+    if (!currentUser) {
+        console.warn('[MESSAGES] No current user');
+        return;
+    }
+
+    try {
+        console.log('[MESSAGES] Loading messages for user:', currentUser.id);
+        const messagesList = document.getElementById('messages-list');
+        
+        if (!messagesList) {
+            console.warn('[MESSAGES] Messages list element not found');
+            return;
+        }
+
+        messagesList.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Loading messages...</div>';
+
+        const token = localStorage.getItem('access_token');
+        const response = await fetch(`${API_URL}/messages/user/${currentUser.id}/`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to load messages: ${response.status}`);
+        }
+
+        const messages = await response.json();
+        console.log('[MESSAGES] Loaded messages:', messages.length);
+
+        renderMessages(messages);
+        updateUnreadCount(messages);
+    } catch (error) {
+        console.error('[MESSAGES] Error loading messages:', error);
+        document.getElementById('messages-list').innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>Failed to load messages. Please try again.</p>
+            </div>
+        `;
+    }
+}
+
+function renderMessages(messages) {
+    const messagesList = document.getElementById('messages-list');
+    
+    if (messages.length === 0) {
+        messagesList.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>No messages yet. Send a message to get started!</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Group messages into conversations
+    const messagesHTML = messages.map(msg => {
+        const isFromUser = msg.sender === 'user';
+        const timestamp = new Date(msg.created_at).toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        return `
+            <div class="message-card ${isFromUser ? 'message-user' : 'message-admin'} ${msg.read ? 'read' : 'unread'}">
+                <div class="message-header">
+                    <div class="message-sender">
+                        <i class="fas fa-${isFromUser ? 'user' : 'user-shield'}"></i>
+                        <strong>${isFromUser ? 'You' : 'Admin'}</strong>
+                    </div>
+                    <div class="message-time">${timestamp}</div>
+                </div>
+                <div class="message-body">
+                    ${escapeHtml(msg.text)}
+                </div>
+                ${!msg.read && !isFromUser ? '<span class="unread-indicator">New</span>' : ''}
+            </div>
+        `;
+    }).join('');
+
+    messagesList.innerHTML = messagesHTML;
+}
+
+function updateUnreadCount(messages) {
+    const unreadMessages = messages.filter(msg => !msg.read && msg.sender === 'admin');
+    const unreadCount = document.getElementById('unread-count');
+    
+    if (unreadCount) {
+        if (unreadMessages.length > 0) {
+            unreadCount.textContent = unreadMessages.length;
+            unreadCount.style.display = 'inline-block';
+        } else {
+            unreadCount.style.display = 'none';
+        }
+    }
+}
+
+async function sendMessage(messageText) {
+    try {
+        console.log('[MESSAGES] Sending message...');
+        const token = localStorage.getItem('access_token');
+        
+        const response = await fetch(`${API_URL}/messages/`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                text: messageText,
+                sender: 'user'
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to send message: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('[MESSAGES] Message sent successfully:', data);
+        
+        showToast('Message sent successfully!', 'success');
+        await loadUserMessages();
+        return data;
+    } catch (error) {
+        console.error('[MESSAGES] Error sending message:', error);
+        showToast('Failed to send message. Please try again.', 'error');
+        throw error;
+    }
+}
+
+function setupMessaging() {
+    // Tab switching
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabName = btn.dataset.tab;
+            
+            // Update active states
+            tabButtons.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => {
+                c.classList.remove('active');
+                c.style.display = 'none';
+            });
+            
+            btn.classList.add('active');
+            const activeTab = document.getElementById(`${tabName}-tab`);
+            if (activeTab) {
+                activeTab.classList.add('active');
+                activeTab.style.display = 'block';
+            }
+            
+            // Load messages when switching to messages tab
+            if (tabName === 'messages') {
+                loadUserMessages();
+            }
+        });
+    });
+
+    // Compose message modal
+    const composeBtn = document.getElementById('compose-message-btn');
+    const messageModal = document.getElementById('message-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const cancelMessageBtn = document.getElementById('cancel-message-btn');
+    const messageForm = document.getElementById('message-form');
+
+    if (composeBtn) {
+        composeBtn.addEventListener('click', () => {
+            messageModal.style.display = 'flex';
+            document.getElementById('message-text').value = '';
+        });
+    }
+
+    const closeModal = () => {
+        messageModal.style.display = 'none';
+    };
+
+    if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+    if (cancelMessageBtn) cancelMessageBtn.addEventListener('click', closeModal);
+    
+    // Close modal on outside click
+    messageModal?.addEventListener('click', (e) => {
+        if (e.target === messageModal) {
+            closeModal();
+        }
+    });
+
+    // Handle message form submission
+    if (messageForm) {
+        messageForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const messageText = document.getElementById('message-text').value.trim();
+            if (!messageText) {
+                showToast('Please enter a message', 'error');
+                return;
+            }
+
+            try {
+                await sendMessage(messageText);
+                closeModal();
+            } catch (error) {
+                console.error('[MESSAGES] Failed to send message:', error);
+            }
+        });
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // ============================================================================
