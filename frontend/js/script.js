@@ -288,8 +288,28 @@ function showError(msg, duration = 3000) {
 
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
+  initHeaderEffects();
   fetchProducts();
 });
+
+function initHeaderEffects() {
+  const header = document.querySelector('header');
+  if (!header) return;
+  let ticking = false;
+  function onScroll() {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        const y = window.scrollY || window.pageYOffset;
+        if (y > 40) header.classList.add('header-shrink');
+        else header.classList.remove('header-shrink');
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+}
 
 // Expose for testing
 window.fetchProducts = fetchProducts;

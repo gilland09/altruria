@@ -42,6 +42,24 @@ header.hide {
     transform: translateY(-100%);
 }
 
+/* Shrink effect on scroll */
+header.header-shrink {
+    min-height: 64px;
+    padding: 0.4rem 0;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    backdrop-filter: blur(6px);
+}
+
+header.header-shrink .logo-wrap {
+    width: 56px;
+    height: 56px;
+}
+
+header.header-shrink .logo {
+    width: 60px;
+    height: 60px;
+}
+
 .header-container {
     max-width: 1200px;
     margin: 0 auto;
