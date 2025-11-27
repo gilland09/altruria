@@ -335,21 +335,28 @@ function renderOrderHistory(orders) {
         let itemsHtml = '';
         if (order.items && order.items.length > 0) {
             itemsHtml = order.items.map(item => {
-                const itemPrice = parseFloat(item.price || 0);
-                const itemQuantity = parseInt(item.quantity || 1);
-                const itemTotal = itemPrice * itemQuantity;
-                return `
-                    <div class="order-item-row">
-                        <span>${item.product?.name || 'Unknown Product'}</span>
-                        <span>×${itemQuantity}</span>
-                        <span>₱${itemTotal.toFixed(2)}</span>
-                    </div>
-                `;
+                try {
+                    const itemPrice = safeNumber(item.price, 0);
+                    const itemQuantity = parseInt(item.quantity, 10) || 1;
+                    const itemTotal = itemPrice * itemQuantity;
+                    return `
+                        <div class="order-item-row">
+                            <span>${item.product?.name || 'Unknown Product'}</span>
+                            <span>×${itemQuantity}</span>
+                            <span>${formatCurrency(itemTotal)}</span>
+                        </div>
+                    `;
+                } catch (err) {
+                    console.error('[PROFILE] Error rendering order item:', err, item);
+                    return '<div class="order-item-row"><span colspan="3">Error displaying item</span></div>';
+                }
             }).join('');
         }
 
-        // Parse order total as float to handle Django Decimal string
-        const orderTotal = parseFloat(order.total || 0);
+        // Parse order total safely
+        const orderTotal = safeNumber(order.total, 0);
+        const orderSubtotal = safeNumber(order.subtotal, 0);
+        const orderShipping = safeNumber(order.shipping_cost, 0);
 
         orderEl.innerHTML = `
             <div class="order-header">
@@ -380,7 +387,7 @@ function renderOrderHistory(orders) {
                 
                 <div class="order-total">
                     <span>Total:</span>
-                    <strong>₱${orderTotal.toFixed(2)}</strong>
+                    <strong>${formatCurrency(orderTotal)}</strong>
                 </div>
 
                 <div class="order-actions">

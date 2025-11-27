@@ -236,6 +236,23 @@ function showSuccess(message, duration = 3000) {
   setTimeout(() => successDiv.remove(), duration);
 }
 
+/**
+ * Safe number formatter - converts any value to number and formats with decimals
+ * Prevents "toFixed is not a function" errors
+ */
+function safeNumber(value, defaultValue = 0) {
+  const num = Number(value);
+  return isNaN(num) ? defaultValue : num;
+}
+
+/**
+ * Format currency with proper number conversion
+ */
+function formatCurrency(value, defaultValue = 0) {
+  const num = safeNumber(value, defaultValue);
+  return `₱${num.toFixed(2)}`;
+}
+
 // Export for use in other scripts
 window.API_BASE_URL = API_BASE_URL;
 window.API_BASE = API_BASE;
@@ -244,3 +261,6 @@ window.TokenManager = TokenManager;
 window.apiCall = apiCall;
 window.showError = showError;
 window.showSuccess = showSuccess;
+window.safeNumber = safeNumber;
+window.formatCurrency = formatCurrency;
+

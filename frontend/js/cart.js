@@ -79,7 +79,7 @@ function renderCart() {
     const itemsHTML = cart.map(item => {
         const product = productMap[item.productId];
         const quantity = item.quantity || 1;
-        const price = product ? parseFloat(product.price) : 0;
+        const price = safeNumber(product?.price, 0);
         const itemTotal = price * quantity;
 
         if (!product) {
@@ -101,7 +101,7 @@ function renderCart() {
                     <p class="cart-item-category">${product?.category || 'N/A'}</p>
                 </div>
 
-                <div class="cart-item-price">₱${price.toFixed(2)}</div>
+                <div class="cart-item-price">${formatCurrency(price)}</div>
 
                 <div class="quantity-controls">
                     <button class="quantity-btn" onclick="decrementItem(${item.productId})">−</button>
@@ -109,7 +109,7 @@ function renderCart() {
                     <button class="quantity-btn" onclick="incrementItem(${item.productId})">+</button>
                 </div>
 
-                <div class="cart-item-total">₱${itemTotal.toFixed(2)}</div>
+                <div class="cart-item-total">${formatCurrency(itemTotal)}</div>
 
                 <button class="remove-item" onclick="removeFromCart(${item.productId})" title="Remove item">
                     <i class="fas fa-trash"></i>
@@ -126,27 +126,27 @@ function renderCart() {
 }
 
 function updateCartSummary(cart, productMap) {
-    // Calculate subtotal
+    // Calculate subtotal with safe number conversion
     const subtotal = cart.reduce((sum, item) => {
         const product = productMap[item.productId];
-        const price = product ? parseFloat(product.price) : 0;
+        const price = safeNumber(product?.price, 0);
         const quantity = item.quantity || 1;
         const itemTotal = price * quantity;
         
-        console.log(`  Item: ID ${item.productId} | Price: ₱${price.toFixed(2)} | Qty: ${quantity} | Total: ₱${itemTotal.toFixed(2)}`);
+        console.log(`  Item: ID ${item.productId} | Price: ${formatCurrency(price)} | Qty: ${quantity} | Total: ${formatCurrency(itemTotal)}`);
         
         return sum + itemTotal;
     }, 0);
 
     const total = subtotal + SHIPPING_COST;
 
-    console.log(`💰 Subtotal: ₱${subtotal.toFixed(2)} | Shipping: ₱${SHIPPING_COST.toFixed(2)} | Total: ₱${total.toFixed(2)}`);
+    console.log(`💰 Subtotal: ${formatCurrency(subtotal)} | Shipping: ${formatCurrency(SHIPPING_COST)} | Total: ${formatCurrency(total)}`);
 
     const subtotalEl = document.querySelector('.subtotal');
     const totalEl = document.querySelector('.total-amount');
 
-    if (subtotalEl) subtotalEl.textContent = `₱${subtotal.toFixed(2)}`;
-    if (totalEl) totalEl.textContent = `₱${total.toFixed(2)}`;
+    if (subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
+    if (totalEl) totalEl.textContent = formatCurrency(total);
 }
 
 function incrementItem(productId) {
@@ -300,12 +300,12 @@ function calculateTotal() {
 
     const subtotal = cart.reduce((sum, item) => {
         const product = productMap[item.productId];
-        const price = product ? parseFloat(product.price) : 0;
+        const price = safeNumber(product?.price, 0);
         return sum + (price * (item.quantity || 1));
     }, 0);
 
     const total = subtotal + SHIPPING_COST;
-    console.log(`💰 Total calculated: ₱${total.toFixed(2)}`);
+    console.log(`💰 Total calculated: ${formatCurrency(total)}`);
     return total;
 }
 

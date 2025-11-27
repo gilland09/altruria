@@ -183,7 +183,7 @@ function renderOrderSummary() {
         const name = product?.name || 'Unknown Product';
         // Image path: product image from API or fallback to /frontend/images/default-product.png
         const imageUrl = product?.image || '../images/default-product.png';
-        const price = typeof product?.price === 'number' ? product.price : 0;
+        const price = safeNumber(product?.price, 0);
         const quantity = item.quantity || 1;
         const lineTotal = price * quantity;
         subtotal += lineTotal;
@@ -196,7 +196,7 @@ function renderOrderSummary() {
                     <h4>${name}</h4>
                     <div class="qty">Qty: ${quantity}</div>
                 </div>
-                <div class="price">₱${lineTotal.toFixed(2)}</div>
+                <div class="price">${formatCurrency(lineTotal)}</div>
                 ${!product || product._error ? '<div class="error-msg">Product info unavailable</div>' : ''}
             </div>
         `;
@@ -208,9 +208,9 @@ function renderOrderSummary() {
     const shipping = getShippingCost();
     const total = subtotal + shipping;
 
-    document.querySelector('.subtotal').textContent = `₱${subtotal.toFixed(2)}`;
-    document.querySelector('.shipping').textContent = `₱${shipping.toFixed(2)}`;
-    document.querySelector('.total-amount').textContent = `₱${total.toFixed(2)}`;
+    document.querySelector('.subtotal').textContent = formatCurrency(subtotal);
+    document.querySelector('.shipping').textContent = formatCurrency(shipping);
+    document.querySelector('.total-amount').textContent = formatCurrency(total);
 }
 
 /**

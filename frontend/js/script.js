@@ -148,7 +148,8 @@ function createProductCard(p) {
   const img = p.image ? p.image : '../images/poster.png';
   const desc = p.description ? escapeHtml(p.description) : 'Quality farm product';
   const stock = p.stock != null ? p.stock : '∞';
-  const price = p.price != null ? parseFloat(p.price).toFixed(2) : '0.00';
+  const priceNum = safeNumber(p.price, 0);
+  const price = formatCurrency(priceNum).replace('₱', ''); // Remove ₱ since it's added in HTML
   const category = p.category || 'Uncategorized';
   const name = escapeHtml(p.name);
 
