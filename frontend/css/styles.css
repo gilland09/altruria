@@ -187,6 +187,10 @@ header.header-shrink .logo {
     text-decoration: none;
     padding: 0.5rem 1rem;
     border-radius: 20px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.01em;
     transition: background-color 0.2s;
 }
 
@@ -308,14 +312,18 @@ header.header-shrink .logo {
     font-size: 1.1rem;
     font-weight: 600;
     line-height: 1.4;
+    font-family: 'Montserrat', sans-serif;
+    letter-spacing: -0.01em;
 }
 
 .product-info p {
     color: #666;
     font-size: 0.9rem;
     margin-bottom: 1rem;
-    line-height: 1.5;
+    line-height: 1.7;
     flex-grow: 1;
+    font-family: 'Lora', serif;
+    font-weight: 400;
 }
 
 .product-price {
@@ -325,6 +333,7 @@ header.header-shrink .logo {
     margin-bottom: 1rem;
     display: flex;
     align-items: baseline;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .product-price::before {
