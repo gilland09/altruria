@@ -10,16 +10,20 @@
     overflow: hidden;
     box-shadow: 0 8px 28px -6px rgba(255,107,0,0.45);
     isolation: isolate;
+    /* Fallback background in case image fails to load */
+    background: linear-gradient(135deg, #ff6b00 0%, #ff9330 100%);
+    min-height: 600px;
 }
 
 .hero-section::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: url('../images/hero_section2.jpg') center/cover no-repeat;
+    background-image: url('../images/hero_section2.jpg');
     background-size: cover;
     background-position: center;
-    opacity: 0.35;
+    background-repeat: no-repeat;
+    opacity: 0.4;
     transform: scale(1.05);
     filter: saturate(1.1) contrast(1.05);
 }
@@ -156,9 +160,10 @@
         padding: 3.25rem 0.75rem 3.75rem;
         margin: 1.5rem 0.75rem 2.25rem;
         border-radius: var(--radius-md, 10px);
+        min-height: 400px;
     }
     .hero-section::before { 
-        opacity: 0.28;
+        opacity: 0.35;
         background-position: center center;
         background-size: cover;
     }
