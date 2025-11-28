@@ -359,6 +359,12 @@ function renderOrderHistory(orders) {
     `;
     container.appendChild(filterButtons);
 
+    // Add a concise explanatory hint about payment labels
+    const paymentHint = document.createElement('div');
+    paymentHint.className = 'payment-status-hint';
+    paymentHint.textContent = 'Payment labels follow Order status: Pending → Awaiting Payment; Paid/Shipped/Completed → Paid.';
+    filterButtons.appendChild(paymentHint);
+
     // Create orders list container
     const ordersList = document.createElement('div');
     ordersList.className = 'orders-list';
