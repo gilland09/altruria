@@ -21,14 +21,14 @@ html, body {
 
 body {
     background-color: var(--background-color);
-    padding-top: 80px;  /* Account for fixed header */
+    padding-top: 70px;  /* Account for fixed header */
 }
 
 /* Header Styles */
 header {
     background-color: var(--primary-color);
-    padding: 0.6rem 0;
-    min-height: 80px;
+    padding: 0.5rem 0;
+    min-height: 70px;
     position: fixed;
     top: 0;
     left: 0;
@@ -44,20 +44,20 @@ header.hide {
 
 /* Shrink effect on scroll */
 header.header-shrink {
-    min-height: 64px;
-    padding: 0.4rem 0;
+    min-height: 56px;
+    padding: 0.35rem 0;
     box-shadow: 0 4px 16px rgba(0,0,0,0.15);
     backdrop-filter: blur(6px);
 }
 
 header.header-shrink .logo-wrap {
-    width: 56px;
-    height: 56px;
+    width: 48px;
+    height: 48px;
 }
 
 header.header-shrink .logo {
-    width: 60px;
-    height: 60px;
+    width: 52px;
+    height: 52px;
 }
 
 .header-container {
@@ -114,8 +114,8 @@ header.header-shrink .logo {
 
 .logo-wrap {
     background: var(--white);
-    width: 70px;
-    height: 70px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     display: inline-flex;
     align-items: center;
@@ -124,8 +124,8 @@ header.header-shrink .logo {
 }
 
 .logo {
-    width: 80px;
-    height: 80px;
+    width: 68px;
+    height: 68px;
     object-fit: contain;
     border-radius: 50%;
     display: block;
