@@ -452,19 +452,33 @@ function setupFormListeners() {
             const backendOrder = await response.json();
             console.log('✅ Order created successfully:', backendOrder);
 
+            // Clear cart from localStorage and memory immediately
+            window.cart = [];
+            localStorage.removeItem('altruria_cart');
+            localStorage.removeItem('altruria_checkout');
+            
+            // Update cart count in UI if function exists
+            if (typeof updateCartCount === 'function') {
+                updateCartCount();
+            }
+            
+            // Force cart count to 0 in DOM
+            const cartCountElements = document.querySelectorAll('.cart-count');
+            cartCountElements.forEach(el => el.textContent = '0');
+
             // Save to local storage as backup
             try {
                 const order = {
                     id: backendOrder.id || ('ORD-' + Date.now()),
                     date: new Date().toISOString(),
-                    items: window.cart.length,
+                    items: backendOrder.items || [],
                     total: orderPayload.total,
-                    status: 'pending',
+                    status: backendOrder.status || 'pending',
+                    payment_status: backendOrder.payment_status || 'awaiting',
                     deliveryMethod: deliveryMethod.value,
                     customerName: name,
                     customerPhone: phone,
-                    customerEmail: email,
-                    cartItems: window.cart
+                    customerEmail: email
                 };
 
                 const orders = localStorage.getItem('altruriaOrders');
@@ -475,20 +489,13 @@ function setupFormListeners() {
                 console.warn('Could not save to localStorage:', e);
             }
 
-            // Clear cart
-            window.cart = [];
-            localStorage.removeItem('altruria_checkout');
-            if (typeof updateCartCount === 'function') {
-                updateCartCount();
-            }
-
             // Show success message
-            showToast('Order placed successfully! Thank you for your purchase.', 'success');
-            console.log('✅ Order successful. Redirecting...');
+            showToast('Order placed successfully! Redirecting to your profile...', 'success');
+            console.log('✅ Order successful. Redirecting to profile...');
 
-            // Redirect after delay
+            // Redirect to profile page after delay
             setTimeout(() => {
-                window.location.href = '../index.html';
+                window.location.href = 'profile.html';
             }, 2000);
 
         } catch (error) {

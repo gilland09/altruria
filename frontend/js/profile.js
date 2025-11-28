@@ -325,6 +325,74 @@ function renderOrderHistory(orders) {
         return;
     }
 
+    // Categorize orders by status
+    const categorized = {
+        pending: orders.filter(o => o.status === 'pending'),
+        paid: orders.filter(o => o.status === 'paid'),
+        shipped: orders.filter(o => o.status === 'shipped'),
+        completed: orders.filter(o => o.status === 'completed'),
+        cancelled: orders.filter(o => o.status === 'cancelled')
+    };
+
+    // Create filter buttons
+    const filterButtons = document.createElement('div');
+    filterButtons.className = 'order-filters';
+    filterButtons.innerHTML = `
+        <button class="filter-btn active" data-filter="all">
+            All (${orders.length})
+        </button>
+        <button class="filter-btn" data-filter="pending">
+            <i class="fas fa-clock"></i> Pending (${categorized.pending.length})
+        </button>
+        <button class="filter-btn" data-filter="paid">
+            <i class="fas fa-check-circle"></i> Paid (${categorized.paid.length})
+        </button>
+        <button class="filter-btn" data-filter="shipped">
+            <i class="fas fa-shipping-fast"></i> Shipped (${categorized.shipped.length})
+        </button>
+        <button class="filter-btn" data-filter="completed">
+            <i class="fas fa-check-double"></i> Completed (${categorized.completed.length})
+        </button>
+        <button class="filter-btn" data-filter="cancelled">
+            <i class="fas fa-times-circle"></i> Cancelled (${categorized.cancelled.length})
+        </button>
+    `;
+    container.appendChild(filterButtons);
+
+    // Create orders list container
+    const ordersList = document.createElement('div');
+    ordersList.className = 'orders-list';
+    container.appendChild(ordersList);
+
+    // Render all orders initially
+    renderOrderCards(orders, ordersList);
+
+    // Setup filter functionality
+    const filterBtns = filterButtons.querySelectorAll('.filter-btn');
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const filter = btn.dataset.filter;
+            const filteredOrders = filter === 'all' ? orders : categorized[filter];
+            renderOrderCards(filteredOrders, ordersList);
+        });
+    });
+}
+
+function renderOrderCards(orders, container) {
+    container.innerHTML = '';
+
+    if (orders.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>No orders in this category</p>
+            </div>
+        `;
+        return;
+    }
+
     orders.forEach(order => {
         const orderEl = document.createElement('div');
         orderEl.className = 'order-card';
@@ -359,13 +427,33 @@ function renderOrderHistory(orders) {
         const orderSubtotal = safeNumber(order.subtotal, 0);
         const orderShipping = safeNumber(order.shipping_cost, 0);
 
+        // Determine payment status label
+        let paymentStatusLabel = '';
+        const paymentMethod = order.payment_method || 'unknown';
+        const paymentStatus = order.payment_status || 'awaiting';
+        
+        if ((paymentMethod === 'bank' || paymentMethod === 'gcash') && paymentStatus === 'paid') {
+            paymentStatusLabel = '<span class="payment-status status-paid"><i class="fas fa-check-circle"></i> Paid</span>';
+        } else if ((paymentMethod === 'bank' || paymentMethod === 'gcash') && paymentStatus !== 'paid') {
+            paymentStatusLabel = '<span class="payment-status status-awaiting"><i class="fas fa-clock"></i> Awaiting Payment</span>';
+        }
+
+        // Combined status for shipped + paid
+        let combinedStatus = statusLabel;
+        if (order.status === 'shipped' && paymentStatus === 'paid') {
+            combinedStatus = 'Paid & Shipped';
+        }
+
         orderEl.innerHTML = `
             <div class="order-header">
                 <div class="order-id">
                     <strong>Order #${order.id}</strong>
                     <span class="order-date">${createdDate}</span>
                 </div>
-                <span class="order-status ${statusClass}">${statusLabel}</span>
+                <div class="order-status-group">
+                    <span class="order-status ${statusClass}">${combinedStatus}</span>
+                    ${paymentStatusLabel}
+                </div>
             </div>
             
             <div class="order-details">
@@ -376,14 +464,21 @@ function renderOrderHistory(orders) {
                 <div class="order-meta">
                     <div class="meta-row">
                         <span>Payment:</span>
-                        <strong>${order.payment_method === 'cod' ? 'Cash on Delivery' : 
-                                  order.payment_method === 'bank' ? 'Bank Transfer' : 
-                                  order.payment_method === 'gcash' ? 'GCash' : order.payment_method}</strong>
+                        <strong>${paymentMethod === 'cod' ? 'Cash on Delivery' : 
+                                  paymentMethod === 'bank' ? 'Bank Transfer' : 
+                                  paymentMethod === 'gcash' ? 'GCash' : 
+                                  paymentMethod === 'cash' ? 'Cash' : paymentMethod}</strong>
                     </div>
                     <div class="meta-row">
                         <span>Delivery:</span>
                         <strong>${order.delivery_method === 'pickup' ? 'Pick Up' : 'Delivery'}</strong>
                     </div>
+                    ${order.shipping_address ? `
+                    <div class="meta-row">
+                        <span>Address:</span>
+                        <strong>${order.shipping_address}</strong>
+                    </div>
+                    ` : ''}
                 </div>
                 
                 <div class="order-total">
