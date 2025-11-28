@@ -474,7 +474,7 @@ function setupFormListeners() {
                     items: backendOrder.items || [],
                     total: orderPayload.total,
                     status: backendOrder.status || 'pending',
-                    payment_status: backendOrder.payment_status || 'awaiting',
+                    payment_method: orderPayload.payment_method,
                     deliveryMethod: deliveryMethod.value,
                     customerName: name,
                     customerPhone: phone,

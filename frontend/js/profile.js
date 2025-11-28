@@ -430,17 +430,20 @@ function renderOrderCards(orders, container) {
         // Determine payment status label
         let paymentStatusLabel = '';
         const paymentMethod = order.payment_method || 'unknown';
-        const paymentStatus = order.payment_status || 'awaiting';
+        const orderStatus = order.status || 'pending';
         
-        if ((paymentMethod === 'bank' || paymentMethod === 'gcash') && paymentStatus === 'paid') {
-            paymentStatusLabel = '<span class="payment-status status-paid"><i class="fas fa-check-circle"></i> Paid</span>';
-        } else if ((paymentMethod === 'bank' || paymentMethod === 'gcash') && paymentStatus !== 'paid') {
-            paymentStatusLabel = '<span class="payment-status status-awaiting"><i class="fas fa-clock"></i> Awaiting Payment</span>';
+        // Show payment status for bank/gcash orders
+        if (paymentMethod === 'bank' || paymentMethod === 'gcash') {
+            if (orderStatus === 'paid' || orderStatus === 'shipped' || orderStatus === 'completed') {
+                paymentStatusLabel = '<span class="payment-status status-paid"><i class="fas fa-check-circle"></i> Paid</span>';
+            } else if (orderStatus === 'pending') {
+                paymentStatusLabel = '<span class="payment-status status-awaiting"><i class="fas fa-clock"></i> Awaiting Payment</span>';
+            }
         }
 
         // Combined status for shipped + paid
         let combinedStatus = statusLabel;
-        if (order.status === 'shipped' && paymentStatus === 'paid') {
+        if (orderStatus === 'shipped' && (paymentMethod === 'bank' || paymentMethod === 'gcash')) {
             combinedStatus = 'Paid & Shipped';
         }
 
